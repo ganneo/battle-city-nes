@@ -1,89 +1,73 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
-import { Layer, Rect, Stage } from "react-konva";
-import { KonvaEventObject } from "konva/lib/Node";
-import Position, { DEFAULT_POSITION } from "./models/Position";
+import { Layer, Circle, Stage } from "react-konva";
+import Konva from "konva";
+import { clearInterval } from "timers";
 
 function App() {
-  const [positionState, setPositionState] = useState<Position>(
-    DEFAULT_POSITION
-  );
+  const MOVE_RATE = 4;
+  const [xState, setXState] = useState(200);
+  const [yState, setYState] = useState(300);
+  const stageRef = useRef<Konva.Stage>(null);
 
-  const dragStartHandler = (e: KonvaEventObject<DragEvent>) => {
-    e.target.setAttrs({
-      shadowOffset: {
-        x: 10,
-        y: 20,
-      },
-      scale: {
-        x: 3,
-        y: 5,
-      },
-    });
-  };
+  let LEFT = false;
+  let RIGHT = false;
+  let UP = false;
+  let DOWN = false;
 
-  const dragEndHandler = (e: KonvaEventObject<DragEvent>) => {
-    e.target.setAttrs({
-      shadowOffset: {
-        x: 0,
-        y: 0,
-      },
-      scale: {
-        x: 1,
-        y: 1,
-      },
-    });
+  useEffect(() => {
+    const container = stageRef.current!.container();
+    container.onkeydown = (event) => {
+      if (event.key === "a") {
+        LEFT = true;
+      } else if (event.key === "d") {
+        RIGHT = true;
+      } else if (event.key === "w") {
+        UP = true;
+      } else if (event.key === "s") {
+        DOWN = true;
+      }
+    };
+    container.onkeyup = (event) => {
+      if (event.key === "a") {
+        LEFT = false;
+      } else if (event.key === "d") {
+        RIGHT = false;
+      } else if (event.key === "w") {
+        UP = false;
+      } else if (event.key === "s") {
+        DOWN = false;
+      }
+    };
 
-    setPositionState(new Position(e.target.x(), e.target.y()));
-  };
+    const update = () => {
+      if (LEFT) {
+        setXState((prevState) => prevState - MOVE_RATE);
+      } else if (RIGHT) {
+        setXState((prevState) => prevState + MOVE_RATE);
+      } else if (UP) {
+        setYState((prevState) => prevState - MOVE_RATE);
+      } else if (DOWN) {
+        setYState((prevState) => prevState + MOVE_RATE);
+      }
+    };
 
-  const MOVE_RATE = 100;
+    const interval = setInterval(update, 10);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
-    <div
-      className="App"
-      id="app"
-      onKeyPress={(event) => {
-        if (event.key === "w") {
-          setPositionState(
-            (oldState) => new Position(oldState.x, oldState.y - MOVE_RATE)
-          );
-          return;
-        }
-        if (event.key === "a") {
-          setPositionState(
-            (oldState) => new Position(oldState.x - MOVE_RATE, oldState.y)
-          );
-          return;
-        }
-        if (event.key === "s") {
-          setPositionState(
-            (oldState) => new Position(oldState.x, oldState.y + MOVE_RATE)
-          );
-          return;
-        }
-        if (event.key === "d") {
-          setPositionState(
-            (oldState) => new Position(oldState.x + MOVE_RATE, oldState.y)
-          );
-          return;
-        }
-      }}
-      tabIndex={0}
-    >
-      <Stage width={window.innerWidth} height={window.innerHeight}>
-        <Layer>
-          <Rect
-            width={20}
-            height={30}
-            fill="red"
-            x={positionState.x}
-            y={positionState.y}
-            shadowBlur={5}
-            draggable
-            onDragStart={dragStartHandler}
-            onDragEnd={dragEndHandler}
-          />
+    <div className="App">
+      <Stage
+        height={window.innerHeight}
+        width={window.innerWidth}
+        ref={stageRef}
+        tabIndex={0}
+      >
+        <Layer x={xState} y={yState}>
+          <Circle radius={100} fill="green" />
         </Layer>
       </Stage>
     </div>
