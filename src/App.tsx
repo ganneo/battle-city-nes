@@ -1,56 +1,74 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
-import { Layer, Circle, Stage } from "react-konva";
-import Konva from "konva";
+import { Layer, Stage } from "react-konva";
 import { clearInterval } from "timers";
+import Position from "./models/Position";
+import Appearance from "./models/Appearance";
+import Direction from "./models/Direction";
+import ControllableTank from "./components/tank/ControllableTank";
+import ControllableTankModel from "./models/ControllableTankModel";
+import Konva from "konva";
 
 function App() {
-  const MOVE_RATE = 4;
-  const [xState, setXState] = useState(200);
-  const [yState, setYState] = useState(300);
   const stageRef = useRef<Konva.Stage>(null);
 
-  let LEFT = false;
-  let RIGHT = false;
-  let UP = false;
-  let DOWN = false;
+  const [tanksState, setTanksState] = useState<ControllableTankModel[] | null>(
+    null
+  );
+
+  const update = () =>
+    setTanksState((prevTanks) => {
+      return prevTanks!.map((tank) => {
+        switch (tank.direction) {
+          case Direction.UP:
+            tank.position.y = tank.position.y - tank.speed;
+            break;
+          case Direction.DOWN:
+            tank.position.y = tank.position.y + tank.speed;
+            break;
+          case Direction.LEFT:
+            tank.position.x = tank.position.x - tank.speed;
+            break;
+          case Direction.RIGHT:
+            tank.position.x = tank.position.x + tank.speed;
+            break;
+          default:
+            break;
+        }
+
+        return tank;
+      });
+    });
 
   useEffect(() => {
-    const container = stageRef.current!.container();
-    container.onkeydown = (event) => {
-      if (event.key === "a") {
-        LEFT = true;
-      } else if (event.key === "d") {
-        RIGHT = true;
-      } else if (event.key === "w") {
-        UP = true;
-      } else if (event.key === "s") {
-        DOWN = true;
-      }
-    };
-    container.onkeyup = (event) => {
-      if (event.key === "a") {
-        LEFT = false;
-      } else if (event.key === "d") {
-        RIGHT = false;
-      } else if (event.key === "w") {
-        UP = false;
-      } else if (event.key === "s") {
-        DOWN = false;
-      }
-    };
+    const stage = stageRef.current!;
+    const tank1 = new ControllableTankModel(
+      new Position(100, 200),
+      2,
+      new Appearance("green"),
+      Direction.NONE,
+      4,
+      "w",
+      "s",
+      "a",
+      "d",
+      stage
+    );
+    const tank2 = new ControllableTankModel(
+      new Position(300, 200),
+      2,
+      new Appearance("yellow"),
+      Direction.NONE,
+      4,
+      "8",
+      "5",
+      "4",
+      "6",
+      stage
+    );
 
-    const update = () => {
-      if (LEFT) {
-        setXState((prevState) => prevState - MOVE_RATE);
-      } else if (RIGHT) {
-        setXState((prevState) => prevState + MOVE_RATE);
-      } else if (UP) {
-        setYState((prevState) => prevState - MOVE_RATE);
-      } else if (DOWN) {
-        setYState((prevState) => prevState + MOVE_RATE);
-      }
-    };
+    const tanks = [tank1, tank2];
+    setTanksState(tanks);
 
     const interval = setInterval(update, 10);
     return () => {
@@ -63,11 +81,13 @@ function App() {
       <Stage
         height={window.innerHeight}
         width={window.innerWidth}
-        ref={stageRef}
         tabIndex={0}
+        ref={stageRef}
       >
-        <Layer x={xState} y={yState}>
-          <Circle radius={100} fill="green" />
+        <Layer>
+          {tanksState?.map((tank) => (
+            <ControllableTank controllableTank={tank} />
+          ))}
         </Layer>
       </Stage>
     </div>

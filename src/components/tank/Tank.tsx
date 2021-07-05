@@ -1,16 +1,23 @@
 import React from "react";
+import { Rect } from "react-konva";
+import TankModel from "../../models/TankModel";
 
 interface TankProps {
-    ctx: CanvasRenderingContext2D
-    size: [number, number]
-    position: [number, number]
+  tankModel: TankModel;
 }
 
 const Tank: React.FC<TankProps> = (props) => {
-    props.ctx.fillStyle = 'green'
-    props.ctx.fillRect(props.position[0], props.position[1], props.size[0], props.size[1])
+  return (
+    <Rect
+      height={200}
+      width={100}
+      cornerRadius={5}
+      shadowBlur={10}
+      x={props.tankModel.position.x}
+      y={props.tankModel.position.y}
+      fill={props.tankModel.appearance.color}
+    />
+  );
+};
 
-    return null
-}
-
-export default Tank
+export default Tank;

@@ -18,6 +18,4 @@ class Position {
   }
 }
 
-export const DEFAULT_POSITION = new Position(10, 20);
-
 export default Position;
