@@ -1,6 +1,5 @@
 import TankModel from "./TankModel";
 import Position from "./Position";
-import Appearance from "./Appearance";
 import Konva from "konva";
 import Direction from "./Direction";
 
@@ -10,16 +9,19 @@ class ControllableTankModel extends TankModel {
   constructor(
     _position: Position,
     _lifePoint: number,
-    _appearance: Appearance,
     _direction: Direction,
     _speed: number,
     private _upKey: string,
     private _downKey: string,
     private _leftKey: string,
     private _rightKey: string,
-    private _stage: Konva.Stage
+    private _shootKey: string,
+    private _stage: Konva.Stage,
+    _height: number,
+    _width: number,
+    _color: string
   ) {
-    super(_position, _lifePoint, _appearance, _direction, _speed);
+    super(_position, _lifePoint, _direction, _speed, _height, _width, _color);
     this._registeredMoveKeys = new Set([_upKey, _downKey, _leftKey, _rightKey]);
   }
 
@@ -69,6 +71,14 @@ class ControllableTankModel extends TankModel {
 
   set registeredMoveKeys(value: Set<string>) {
     this._registeredMoveKeys = value;
+  }
+
+  get shootKey(): string {
+    return this._shootKey;
+  }
+
+  set shootKey(value: string) {
+    this._shootKey = value;
   }
 }
 

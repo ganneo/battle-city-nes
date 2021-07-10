@@ -1,22 +1,20 @@
 import Position from "./Position";
-import Appearance from "./Appearance";
 import Direction from "./Direction";
+import MovableModel from "./MovableModel";
 
-class TankModel {
+class TankModel extends MovableModel {
+  private _fireDirection: Direction;
   constructor(
-    private _position: Position,
+    _position: Position,
     private _lifePoint: number,
-    private _appearance: Appearance,
-    private _direction: Direction,
-    private _speed: number
-  ) {}
-
-  get position(): Position {
-    return this._position;
-  }
-
-  set position(value: Position) {
-    this._position = value;
+    _direction: Direction,
+    _speed: number,
+    _height: number,
+    _width: number,
+    _color: string
+  ) {
+    super(_position, _direction, _speed, _height, _width, _color);
+    this._fireDirection = Direction.UP;
   }
 
   get lifePoint(): number {
@@ -27,28 +25,19 @@ class TankModel {
     this._lifePoint = value;
   }
 
-  get appearance(): Appearance {
-    return this._appearance;
+  override get direction() {
+    return this._direction
   }
 
-  set appearance(value: Appearance) {
-    this._appearance = value;
+  override set direction(direction: Direction) {
+    this._direction = direction;
+    if (direction !== Direction.NONE) {
+      this._fireDirection = direction;
+    }
   }
 
-  get direction(): Direction {
-    return this._direction;
-  }
-
-  set direction(value: Direction) {
-    this._direction = value;
-  }
-
-  get speed(): number {
-    return this._speed;
-  }
-
-  set speed(value: number) {
-    this._speed = value;
+  get fireDirection(): Direction {
+    return this._fireDirection;
   }
 }
 

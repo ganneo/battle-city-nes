@@ -2,9 +2,12 @@ import React, { useEffect } from "react";
 import ControllableTankModel from "../../models/ControllableTankModel";
 import Tank from "./Tank";
 import Direction from "../../models/Direction";
+import BulletModel from "../../models/BulletModel";
+import Position from "../../models/Position";
 
 interface ControllableTankProps {
   controllableTank: ControllableTankModel;
+  onFire: (bullet: BulletModel) => void;
 }
 
 function ControllableTank(props: ControllableTankProps) {
@@ -28,6 +31,24 @@ function ControllableTank(props: ControllableTankProps) {
           break;
       }
     };
+    const keyPressHandler = (event: KeyboardEvent) => {
+      if (props.controllableTank.shootKey === event.key) {
+        props.onFire(
+          new BulletModel(
+            new Position(
+              props.controllableTank.position.x,
+              props.controllableTank.position.y
+            ),
+            props.controllableTank,
+            props.controllableTank.fireDirection,
+            8,
+            10,
+            10,
+            props.controllableTank.color
+          )
+        );
+      }
+    };
     const keyUpHandler = (event: KeyboardEvent) => {
       if (props.controllableTank.registeredMoveKeys.has(event.key)) {
         props.controllableTank.direction = Direction.NONE;
@@ -35,12 +56,14 @@ function ControllableTank(props: ControllableTankProps) {
     };
     container.addEventListener("keydown", keyDownHandler);
     container.addEventListener("keyup", keyUpHandler);
+    container.addEventListener("keypress", keyPressHandler);
 
     return () => {
       container.removeEventListener("keydown", keyDownHandler);
       container.removeEventListener("keyup", keyUpHandler);
+      container.removeEventListener("keypress", keyPressHandler);
     };
-  }, [props.controllableTank]);
+  }, [props]);
 
   return <Tank tankModel={props.controllableTank} />;
 }

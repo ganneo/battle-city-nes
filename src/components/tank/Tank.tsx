@@ -9,13 +9,13 @@ interface TankProps {
 const Tank: React.FC<TankProps> = (props) => {
   return (
     <Rect
-      height={200}
-      width={100}
+      height={props.tankModel.height}
+      width={props.tankModel.width}
       cornerRadius={5}
       shadowBlur={10}
-      x={props.tankModel.position.x}
-      y={props.tankModel.position.y}
-      fill={props.tankModel.appearance.color}
+      x={props.tankModel.position.x - props.tankModel.width / 2}
+      y={props.tankModel.position.y - props.tankModel.height / 2}
+      fill={props.tankModel.color}
     />
   );
 };

@@ -1,80 +1,133 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useReducer, useRef } from "react";
 import "./App.css";
 import { Layer, Stage } from "react-konva";
-import { clearInterval } from "timers";
 import Position from "./models/Position";
-import Appearance from "./models/Appearance";
 import Direction from "./models/Direction";
 import ControllableTank from "./components/tank/ControllableTank";
 import ControllableTankModel from "./models/ControllableTankModel";
 import Konva from "konva";
+import BulletModel from "./models/BulletModel";
+import Bullet from "./components/bullet/Bullet";
+import TankModel from "./models/TankModel";
+import Action from "./models/ActionType";
+import { ActionType } from "./models/ActionType";
+
+interface PositionStateType {
+  tankModels: TankModel[];
+  bulletModels: BulletModel[];
+}
 
 function App() {
   const stageRef = useRef<Konva.Stage>(null);
 
-  const [tanksState, setTanksState] = useState<ControllableTankModel[] | null>(
-    null
-  );
-
-  const update = () =>
-    setTanksState((prevTanks) => {
-      return prevTanks!.map((tank) => {
-        switch (tank.direction) {
-          case Direction.UP:
-            tank.position.y = tank.position.y - tank.speed;
-            break;
-          case Direction.DOWN:
-            tank.position.y = tank.position.y + tank.speed;
-            break;
-          case Direction.LEFT:
-            tank.position.x = tank.position.x - tank.speed;
-            break;
-          case Direction.RIGHT:
-            tank.position.x = tank.position.x + tank.speed;
-            break;
-          default:
-            break;
-        }
-
-        return tank;
-      });
-    });
-
-  useEffect(() => {
-    const stage = stageRef.current!;
-    const tank1 = new ControllableTankModel(
-      new Position(100, 200),
+  const initPosition: PositionStateType = { tankModels: [], bulletModels: [] };
+  const initPositionFunc: (stage: Konva.Stage) => PositionStateType = (
+    stage
+  ) => {
+    const greenTank = new ControllableTankModel(
+      new Position(0, 0),
       2,
-      new Appearance("green"),
       Direction.NONE,
       4,
       "w",
       "s",
       "a",
       "d",
-      stage
+      "l",
+      stage,
+      100,
+      100,
+      "green"
     );
-    const tank2 = new ControllableTankModel(
-      new Position(300, 200),
+    const yellowTank = new ControllableTankModel(
+      new Position(800, 400),
       2,
-      new Appearance("yellow"),
       Direction.NONE,
       4,
       "8",
       "5",
       "4",
       "6",
-      stage
+      ".",
+      stage,
+      100,
+      100,
+      "black"
     );
 
-    const tanks = [tank1, tank2];
-    setTanksState(tanks);
+    const tanks = [greenTank, yellowTank];
+    return { tankModels: tanks, bulletModels: [] };
+  };
 
-    const interval = setInterval(update, 10);
+  const updatePosition: (
+    prevPositions: PositionStateType,
+    action: Action
+  ) => PositionStateType = (prevPositions, action) => {
+    if (action.type === ActionType.POSITION_UPDATED) {
+      const tankModels = prevPositions.tankModels
+        .filter((tank) =>
+          tank.survive(
+            prevPositions.bulletModels.filter((bullet) => bullet.tank !== tank)
+          )
+        )
+        .map((tank) => {
+          tank.updatePosition();
+          return tank;
+        });
+
+      const bulletModels = prevPositions.bulletModels
+        .filter((bullet) =>
+          bullet.survive([
+            ...prevPositions.bulletModels.filter(
+              (otherBullet) => otherBullet.tank !== bullet.tank
+            ),
+            ...prevPositions.tankModels.filter((tank) => tank !== bullet.tank),
+          ])
+        )
+        .map((bullet) => {
+          bullet.updatePosition();
+          return bullet;
+        });
+
+      return { tankModels: tankModels, bulletModels: bulletModels };
+    }
+
+    if (action.type === ActionType.INITIALIZED) {
+      return initPositionFunc(stageRef.current!);
+    }
+
+    if (action.type === ActionType.BULLET_FIRED) {
+      return {
+        tankModels: prevPositions.tankModels,
+        bulletModels: [
+          ...prevPositions.bulletModels,
+          action.payload as BulletModel,
+        ],
+      };
+    }
+
+    return prevPositions;
+  };
+
+  const [positionState, positionDispatcher] = useReducer(
+    updatePosition,
+    initPosition
+  );
+
+  useEffect(() => {
+    positionDispatcher({ type: ActionType.INITIALIZED });
+
+    const interval = setInterval(() => {
+      positionDispatcher({ type: ActionType.POSITION_UPDATED });
+    }, 30);
     return () => {
       clearInterval(interval);
     };
   }, []);
+
+  const fireHandler = (bullet: BulletModel) => {
+    positionDispatcher({ type: ActionType.BULLET_FIRED, payload: bullet });
+  };
 
   return (
     <div className="App">
@@ -85,9 +138,21 @@ function App() {
         ref={stageRef}
       >
         <Layer>
-          {tanksState?.map((tank) => (
-            <ControllableTank controllableTank={tank} />
-          ))}
+          {positionState.tankModels.map((tank, index) => {
+            if (tank instanceof ControllableTankModel) {
+              return (
+                <ControllableTank
+                  controllableTank={tank}
+                  onFire={fireHandler}
+                  key={index}
+                />
+              );
+            }
+            return null;
+          })}
+          {positionState.bulletModels.map((bullet, index) => {
+            return <Bullet bulletModel={bullet} key={index} />;
+          })}
         </Layer>
       </Stage>
     </div>

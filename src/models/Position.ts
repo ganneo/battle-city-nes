@@ -16,6 +16,10 @@ class Position {
   set y(value: number) {
     this._y = value;
   }
+
+  clone() {
+    return new Position(this._x, this._y);
+  }
 }
 
 export default Position;
