@@ -1,0 +1,75 @@
+{
+  "games": [
+    {
+      "gameName": "Game1",
+      "startTime": "Sun Jul 11 2021",
+      "players": [
+        "neo",
+        "tiffany",
+        "daddy"
+      ]
+    },
+    {
+      "gameName": "Game2",
+      "startTime": "Sun Jul 11 2021",
+      "players": [
+        "neo",
+        "tiffany",
+        "daddy"
+      ]
+    },
+    {
+      "gameName": "Game3",
+      "startTime": "Sun Jul 11 2021",
+      "players": [
+        "neo",
+        "tiffany",
+        "daddy"
+      ]
+    },
+    {
+      "gameName": "Game4",
+      "startTime": "Sun Jul 11 2021",
+      "players": [
+        "neo",
+        "tiffany",
+        "daddy"
+      ]
+    },
+    {
+      "gameName": "Game5",
+      "startTime": "Sun Jul 11 2021",
+      "players": [
+        "neo",
+        "tiffany",
+        "daddy"
+      ]
+    },
+    {
+      "gameName": "Game6",
+      "startTime": "Sun Jul 11 2021",
+      "players": [
+        "neo",
+        "tiffany",
+        "daddy"
+      ]
+    },
+    {
+      "gameName": "Game67",
+      "startTime": "Sun Jul 11 2021",
+      "players": [
+        "neo",
+        "tiffany",
+        "daddy"
+      ]
+    }
+  ],
+  "Game1": {
+    "startTime": "Sun Jul 11 2021",
+    "players": [
+      "neo",
+      "tiffany",
+      "daddy"
+    ]
+  }
+}

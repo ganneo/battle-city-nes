@@ -8,6 +8,7 @@ import Position from "../../models/Position";
 interface ControllableTankProps {
   controllableTank: ControllableTankModel;
   onFire: (bullet: BulletModel) => void;
+  username: string | null;
 }
 
 function ControllableTank(props: ControllableTankProps) {
@@ -65,7 +66,11 @@ function ControllableTank(props: ControllableTankProps) {
     };
   }, [props]);
 
-  return <Tank tankModel={props.controllableTank} />;
+  return (
+    <React.Fragment>
+      <Tank tankModel={props.controllableTank} username={props.username} />
+    </React.Fragment>
+  );
 }
 
 export default ControllableTank;
